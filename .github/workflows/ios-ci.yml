@@ -1,0 +1,63 @@
+name: Build VIDA16 iOS App
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-package-ipa:
+    name: Build VIDA16 & Export IPA
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Select Xcode 15/16
+        run: |
+          sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
+          xcodebuild -version
+
+      - name: Build VIDA16 (Release)
+        run: |
+          mkdir -p build_output
+          if [ -d "App.xcodeproj" ]; then
+            XCODE_PROJ="App.xcodeproj"
+          else
+            XCODE_PROJ="ios/App.xcodeproj"
+          fi
+          echo "Using Xcode project at: $XCODE_PROJ"
+
+          xcodebuild build \
+            -project "$XCODE_PROJ" \
+            -scheme App \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build_output/DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            AD_HOC_CODE_SIGNING_ALLOWED=YES
+
+      - name: Package into VIDA16.ipa
+        run: |
+          APP_PATH=$(find build_output/DerivedData/Build/Products/Release-iphoneos -name "*.app" | head -n 1)
+          echo "Found app at: $APP_PATH"
+          mkdir -p Payload
+          cp -r "$APP_PATH" Payload/
+          zip -r VIDA16.ipa Payload
+          ls -la VIDA16.ipa
+
+      - name: Upload VIDA16.ipa Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: VIDA16-iOS-Build
+          path: VIDA16.ipa
+          retention-days: 14

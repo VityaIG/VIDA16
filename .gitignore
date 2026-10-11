@@ -1,0 +1,38 @@
+# Xcode
+## User settings & local cache
+xcuserdata/
+DerivedData/
+*.xcuserstate
+project.xcworkspace/xcuserdata/
+*.moved-aside
+*.xcuserstate
+
+## Build generated
+build/
+*.build/
+*.btool/
+*.app
+*.dSYM.zip
+*.dSYM
+
+## Swift Package Manager
+.build/
+.swiftpm/xcode/package.resolved
+.swiftpm/configuration/registries.json
+
+## CocoaPods (if used)
+Pods/
+Podfile.lock
+
+## Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+## macOS System Files
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+Thumbs.db
